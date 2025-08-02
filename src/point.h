@@ -19,14 +19,10 @@ public:
   void setX(const int x) { m_x = x; }
   void setY(const int y) { m_y = y; }
 
-  void makeAbsoluteX();
-  void makeAbsoluteY();
-
-  void makeNegativeX();
-  void makeNegativeY();
 public:
   Point& operator+=(const Point& rhs);
   Point& operator-=(const Point& rhs);
+
 
   Point operator+(const Point& rhs) const;
   Point operator-(const Point& rhs) const;

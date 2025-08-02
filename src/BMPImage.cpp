@@ -4,8 +4,6 @@
 
 #include "BMPImage.h"
 
-#include "point.h"
-
 #include <fstream>  // For std::ifstream, std::ofstream
 #include <iostream> // For std::cerr, std::cout
 #include <cmath>    // For std::abs

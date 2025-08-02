@@ -4,31 +4,6 @@
 
 #include "point.h"
 
-#include <cmath>  // For std::abs
-
-void Point::makeAbsoluteX()
-{
-  m_x = std::abs(m_x);
-}
-
-void Point::makeAbsoluteY()
-{
-  m_y = std::abs(m_x);
-}
-
-void Point::makeNegativeX()
-{
-  if (m_x > 0) {
-    m_x = -m_x;
-  }
-}
-
-void Point::makeNegativeY()
-{
-  if (m_y > 0) {
-    m_y = -m_y;
-  }
-}
 Point &Point::operator+=(const Point &rhs)
 {
   m_x += rhs.m_x;
