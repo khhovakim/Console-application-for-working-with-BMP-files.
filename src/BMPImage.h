@@ -5,12 +5,12 @@
 #ifndef   BMPIMAGE_H
 # define  BMPIMAGE_H
 
-# include "image.h"
+#include "image.h"
 
-# include <cstdint>  // For std::uint16_t, std::uint32_t
-# include <string>   // For std::string
-# include <vector>   // For std::vector
-# include <fstream>  // For std::ifstream
+#include <cstdint> // For std::uint16_t, std::uint32_t
+#include <fstream> // For std::ifstream
+#include <string>  // For std::string
+#include <vector>  // For std::vector
 
 /// This class encapsulates all logic required to load, display, modify,
 /// and save BMP images (specifically 24-bit or 32-bit BMPs).
@@ -18,6 +18,7 @@
 /// draws a line (used to draw a cross), and saves the image.
 
 struct RGB;
+class  Point;
 
 class BMPImage final : public Image
 {
@@ -33,25 +34,28 @@ public:
   [[nodiscard]] bool save(const std::string& filePath) const override;
 
   // Displays the image in the console using ASCII characters:
-  // '#' for black pixels (0,0,0), '.' for white pixels (255,255,255).
+  // ' ' for black pixels (0,0,0), '█' for white pixels (255,255,255).
   void display() const override;
 
   // (Optional accessors if needed outside)
   [[nodiscard]] int getWidth()  const noexcept override { return m_width;  }
   [[nodiscard]] int getHeight() const noexcept override { return m_height; }
 
-  // Draws a line on the image using Bresenham’s algorithm.
-  void drawLine(int x1, int y1, const int x2, const int y2);
+  // Draws an X-shaped cross from corners using drawLine.
+  void drawCross();
+
+  // return true if the point into the image
+  [[nodiscard]] bool isInside(const Point& p) const noexcept;
 
 private:
   // Internal helper to read and parse BMP headers.
   bool _readHeaders(std::ifstream& in);
 
   // Internal pixel drawing function to directly modify RGB values.
-  void _drawPixel(const int x, const int y, const RGB& color);
+  void _drawPixel(const Point& p, const RGB& color);
 
-  // Draws an X-shaped cross from corners using drawLine.
-  void _drawCross();
+  // Draws a line on the image using Bresenham’s algorithm.
+  void _drawLine(const Point& start, const Point& end, const RGB& color);
 
 private:
 

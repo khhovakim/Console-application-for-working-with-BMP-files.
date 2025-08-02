@@ -21,11 +21,7 @@ int main() {
   std::cout << "Original image:\n";
   image.display();
 
-  image.drawLine(0, 0, 10000, 10000); // will be clipped
-  image.drawLine(0, image.getHeight() - 1, image.getWidth() - 1, 0); // draw cross
-
-  std::cout << "Image with cross:\n";
-  image.display();
+  image.drawCross(); // draw cross
 
   std::string outputFile;
   std::cout << ">> Enter output BMP file name: ";
@@ -36,5 +32,6 @@ int main() {
     return 1;
   }
 
+  std::cout << "Image saved successfully!\n";
   return 0;
 }

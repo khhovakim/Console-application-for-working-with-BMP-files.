@@ -54,6 +54,7 @@ $(TARGET): $(OBJFILES)
 	@echo
 	@echo "$(_CYAN)Creating Executable $(_WHITE)$@ ...$(_NC)"
 	@mkdir -p $(@D)
+	@mkdir -p ./out
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJFILES)
 	@echo "$(SUCCESS)\n$(_WHITE)Linked $@$(_NC)"
 
@@ -85,6 +86,7 @@ run:
 .PHONY: clean
 clean:
 	@rm -rf $(OBJDIR)
+	@rm -rf out
 	@echo "$(_YELLOW)[✗] Removed object files$(_NC)"
 
 # ===== Clean everything =====

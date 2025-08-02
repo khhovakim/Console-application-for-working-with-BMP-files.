@@ -4,10 +4,15 @@
 
 #include "BMPImage.h"
 
-#include <iostream>   // For std::cerr, std::cout
-#include <fstream>    // For std::ifstream, std::ofstream
+#include "point.h"
 
-#include "rgb.h"  // For RGB
+#include <fstream>  // For std::ifstream, std::ofstream
+#include <iostream> // For std::cerr, std::cout
+#include <cmath>    // For std::abs
+
+#include "rgb.h"    // For RGB
+#include "point.h"  // For Point
+
 namespace {
 
 constexpr int BMP_IMAGE_TYPE   { 0x4D42 };
@@ -98,37 +103,37 @@ void BMPImage::display() const
       const std::uint8_t green = pixel[1];
       const std::uint8_t red   = pixel[2];
 
-      // Output '#' for black, '.' for white, ' ' for unknown
+      // Output ' ' for black, '█' for white
       if (red == 0 && green == 0 && blue == 0) {
-        std::cout << "#";
+        std::cout << " ";
       } else if (red == 255 && green == 255 && blue == 255) {
-        std::cout << ".";
-      } else {
-        std::cout << " "; // unknown color (not required per assignment)
+        std::cout << "█";
       }
     }
     std::cout << '\n';
   }
 }
 
-void BMPImage::_drawCross()
+void BMPImage::drawCross()
 {
-  drawLine(0, 0, m_width - 1, m_height - 1);
-  drawLine(0, m_height - 1, m_width - 1, 0);
+  const RGB color = getColor(RGB::Red);
+
+  _drawLine(Point{0, 0}, Point{m_width - 1, m_height - 1}, color);
+  _drawLine(Point{0, m_height - 1}, Point{m_width - 1, 0}, color);
 }
 
-void BMPImage::_drawPixel(const int x, const int y, const RGB &color)
+void BMPImage::_drawPixel(const Point& p, const RGB& color)
 {
-  if (x < 0 || x >= m_width || y < 0 || y >= m_height) {
+  if (!isInside(p)) {
     return ;
   }
 
-  const bool isBottomUp   { m_infoHeader.biHeight > 0 };
-  const int bytesPerPixel { m_bitCount / 8 };
-  const int rowIndex      { isBottomUp ? m_height - 1 - y : y };
+  const bool isBottomUp    { m_infoHeader.biHeight > 0 };
+  const int  rowIndex      { isBottomUp ? m_height - 1 - p.getY() : p.getY() };
+  const int  bytesPerPixel { m_bitCount / 8 };
 
   std::uint8_t* row   = m_data.data() + (rowIndex * m_rowStride);
-  std::uint8_t* pixel = row + bytesPerPixel * x;
+  std::uint8_t* pixel = row + bytesPerPixel * p.getX();
 
   //
   pixel[0] = color.b;
@@ -138,34 +143,45 @@ void BMPImage::_drawPixel(const int x, const int y, const RGB &color)
   // If 32-bit image: optional alpha/padding (we leave as-is)
 }
 
-void BMPImage::drawLine(int x1, int y1, const int x2, const int y2)
+void BMPImage::_drawLine(const Point& start, const Point& end, const RGB& color)
 {
   // Bresenham’s line drawing algorithm
-  const int dx = std::abs(x2 - x1);
-  const int dy = -std::abs(y2 - y1);
+  int x0 = start.getX();
+  int y0 = start.getY();
+  const int x1 = end.getX();
+  const int y1 = end.getY();
 
-  const int sx = (x1 < x2) ? 1 : -1;
-  const int sy = (y1 < y2) ? 1 : -1;
+  const int dx = std::abs(x1 - x0);
+  const int dy = std::abs(y1 - y0);
+  const int stepX = (x0 < x1) ? 1 : -1;
+  const int stepY = (y0 < y1) ? 1 : -1;
 
-  int err = dx + dy; // error value
+  int err = dx - dy;
 
   while (true) {
-    // Draw white pixel at (x1, y1) — X is white over black background
-    _drawPixel(x1, y1, {255, 255, 255});
+    _drawPixel(Point{x0, y0}, color);
 
-    if (x1 == x2 && y1 == y2)
+    if (x0 == x1 && y0 == y1)
       break;
 
     const int e2 = 2 * err;
-    if (e2 >= dy) {
-      err += dy;
-      x1 += sx;
+    if (e2 > -dy) {
+      err -= dy;
+      x0 += stepX;
     }
-    if (e2 <= dx) {
+
+    if (e2 < dx) {
       err += dx;
-      y1 += sy;
+      y0 += stepY;
     }
   }
+}
+
+bool BMPImage::isInside(const Point &p) const noexcept
+{
+  const int x = p.getX();
+  const int y = p.getY();
+  return x >= 0 && y >= 0 && x < m_width && y < m_height;
 }
 
 bool BMPImage::save(const std::string& filePath) const
